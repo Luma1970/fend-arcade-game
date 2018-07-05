@@ -1,0 +1,52 @@
+body {
+    text-align: center;
+}
+
+/*
+/* sound attribution
+*/
+.attribution {
+    font-size: 1em;
+}
+
+.attr {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: #efefef;
+  text-align: center;
+}
+
+/*
+/* play again button
+*/
+.button {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 200px;
+}
+
+.start {
+    padding: 15px 25px;
+    font-size: 2em;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: deeppink;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 7px blue;
+}
+
+.start:hover {background-color: #7a0368}
+
+.start:active {
+  background-color: #7a0368;
+  box-shadow: 0 5px darkblue;
+  transform: translateY(4px);
+}
