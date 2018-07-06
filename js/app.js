@@ -1,123 +1,220 @@
-// array for random position and speed of enemies
-let arraY = [61, 132, 223];
-let arraySp = [150, 200, 250, 300, 350];
+// CARD LIST
+var tiles = [
+  'fa-diamond',
+  'fa-anchor',
+  'fa-bolt',
+  'fa-cube',
+  'fa-paper-plane-o',
+  'fa-leaf',
+  'fa-bicycle',
+  'fa-bomb',
+];
 
-// created Enemy class
-class Enemy {
-    constructor() {
-    // added variables for enemy: image, position, speed and dimensions
-    this.sprite = 'images/enemy-bug.png';
-    this.x = -10;
-    this.y = arraY[Math.floor(Math.random() * arraY.length)];
-    this.height = 45;
-    this.width = 45;
-    this.speed = arraySp[Math.floor(Math.random() * arraySp.length)];
+tiles = tiles.concat(tiles);
+
+// ARRAY FOR CARD FLIPPED AND MATCHED
+let openCards = [];
+let matchedCards = [];
+
+// Shuffle function from http://stackoverflow.com/a/2450976
+function shuffle(array) {
+    let currentIndex = array.length, temporaryValue, randomIndex;
+
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
     }
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
-    update(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-    this.x += this.speed * dt;
-        // if enemy reach right limit get out of canvas
-        // then enter again at a random Y position and speed from respective arrays
-        if(this.x > 505) {
-            this.x = -10;
-            this.y = arraY[Math.floor(Math.random() * arraY.length)];
-            this.speed = arraySp[Math.floor(Math.random() * arraySp.length)];
-        }
-    }
+    return array;
+}
 
-// Draw the enemy on the screen, required method for game
-    render() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+// loops into the card list and create its HTML
+let pila = document.getElementById('mazzo');
+
+function display(tiles) {
+    for(tile of tiles) {
+        const lista = document.createElement('li');
+        const carta = pila.appendChild(lista);
+        const icona = lista.appendChild(document.createElement('i'));
+        carta.classList.add('card');
+        icona.classList.add('fa', tile);
+
+        lista.addEventListener('click', function() {
+            if(lista.classList.contains('open')) { }
+            else {
+                mosse(1);
+            }
+            stelle();
+
+//pushes the flipped cards in the openCards array
+        if(lista.classList.contains('open')) { }
+        else if(openCards.length < 2) {
+            lista.classList.add('open', 'show');
+            openCards.push(this);
+            classi();
+           }
+        });
     }
 }
 
-// created Player class
-class Player {
-    constructor() {
-        this.image = 'images/char-horn-girl.png';
-        this.x = 200;
-        this.y = 350;
-        this.height = 45;
-        this.width = 45;
-    }
-    // implemented the collisions with enemies based on enemy and player dimensions
-    //if the collision is true the player return to starting point
-    update() {
-        for(const enemy of allEnemies) {
-            if(enemy.x < this.x + this.width && enemy.x + enemy.width > this.x && enemy.y < this.y + this.height && enemy.y + enemy.height > this.y) {
-                this.x = 200;
-                this.y = 350;
-            }
-        //implemented the victory condition with a sound, a stop of the enemies, a change of the player image
-            if(this.y <= 0) {
-                const sonoro = document.getElementById('suono');
-                sonoro.play();
-                this.image = 'images/char-princess-girl.png';
-                enemy.speed = 0;
-            }
+// compares the symbol and populate the matchedCards array
+let svelate = document.getElementsByClassName('match');
+
+function classi() {
+    if(openCards.length == 2) {
+        const carta1 = openCards[0].innerHTML;
+        const carta2 = openCards[1].innerHTML;
+        if(carta1 === carta2) {
+            openCards[0].className = 'card match';
+            openCards[1].className = 'card match';
+            matchedCards.push(svelate);
+            openCards.splice(0, 2);
+            theEnd();
+        } else {
+            openCards[0].className = 'card wrong';
+            openCards[1].className = 'card wrong';
+            window.setTimeout(svuota, 750);
+        }
+        function svuota() {
+            openCards[0].className = 'card';
+            openCards[1].className = 'card';
+            openCards.splice(0, 2);
         }
     }
-// Draw the player on the screen
-    render() {
-        ctx.drawImage(Resources.get(this.image), this.x, this.y);
-    }
-    //implemented handleInput method to move the player
-    handleInput(key) {
-            switch(key) {
-                case 'up':
-                    if(this.y > 0) {
-                        this.y -= 101;
-                    }
-                break;
+}
 
-                case 'right':
-                    if(this.x < 404) {
-                        this.x += 101;
-                    }
-                break;
-
-                case 'down':
-                    if(this.y < 404) {
-                        this.y += 101;
-                    }
-                break;
-
-                case 'left':
-                    if(this.x > 0) {
-                        this.x -= 101;
-                    }
+// TIMER
+let secondi, minuti, scorrere;
+    function tempo() {
+        secondi= 0;
+        minuti = 0;
+        scorrere = setInterval(tempo1, 1000);
+        function tempo1() {
+            secondi++;
+            if(secondi == 60) {
+                minuti++;
+                secondi = 0;
             }
+            document.getElementById('timer').textContent = `${secondi}  seconds and ${minuti} minutes`;
         }
     }
+tempo();
 
-// instantiate the objects
-let player = new Player();
-let nemico1 = new Enemy();
-let nemico2 = new Enemy();
-let nemico3 = new Enemy();
-let allEnemies = [nemico1, nemico2, nemico3];
+// MOVES COUNTER
+let inc = 0;
+let mosse = function (n) {
+    inc += n / 2;
+    if(Number.isInteger(inc)) {
+    document.getElementById('contatore').innerHTML = inc;
+    }
+}
+
+// STAR RATING
+let grado1 = document.getElementById('rank1');
+let grado2 = document.getElementById('rank2');
+let grado3 = document.getElementById('rank3');
+
+function stelle() {
+    let moves = document.getElementById('contatore').innerHTML;
+    if((moves > 16) && (moves <= 24)) {
+        grado3.classList.add('nascondi');
+    } else if (moves > 24){
+        grado2.classList.add('nascondi');
+        grado3.classList.add('nascondi');
+    }
+}
+
+// START/RESET BUTTON
+let pulsante = document.getElementById('newGame');
+let newDeck = shuffle(tiles);
+
+// populates the game at the page loading
+window.onload = display(newDeck);
+
+pulsante.addEventListener('click', startButton);
+
+function startButton() {
+// CARDS SHUFFLE;
+    pila.innerHTML = '';
+    shuffle(tiles);
+    display(newDeck);
+
+// CLEAR STAR RATING
+    grado2.classList.remove('nascondi');
+    grado3.classList.remove('nascondi');
+
+// CLEAR TIMER
+    clearInterval(scorrere);
+    tempo();
+
+// CLEAR COUNTER
+    resetCounter();
+}
+
+function resetCounter() {
+    inc = 0;
+    document.getElementById('contatore').innerHTML = inc;
+}
+
+// MODAL/END GAME
+let messaggio = document.getElementById('vittoria');
+let chiudi = document.querySelector('.close');
+
+function theEnd() {
+    if(svelate.length == 16) {
+        toggleModal();
+        document.getElementById('sonoro').play();
+        const secIntervallo = setTimeout(clearInterval(scorrere), 100);
+    }
+    const starRating1 = grado1.innerHTML;
+    const starRating2 = grado2.innerHTML;
+    const starRating3 = grado3.innerHTML;
+    const movimenti = document.getElementById('contatore').innerHTML;
+    const tempistica = document.getElementById('timer').innerHTML;
+
+    if ((grado2.classList.contains('nascondi')) && (grado3.classList.contains('nascondi'))) {
+        document.getElementById('stelle').innerHTML = starRating1;
+    } else if (grado3.classList.contains('nascondi')) {
+        document.getElementById('stelle').innerHTML = starRating1 + starRating2;
+    } else {
+        document.getElementById('stelle').innerHTML = starRating1 + starRating2 + starRating3;
+    }
+    document.getElementById('mosse').innerHTML = movimenti;
+    document.getElementById('tempo').innerHTML = tempistica;
 
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
-    };
+}
 
-    player.handleInput(allowedKeys[e.keyCode]);
+// PLAY AGAIN BUTTON
+let giocaAncora = document.getElementById('playAgain');
+giocaAncora.addEventListener('click', function () {
+    startButton();
+    toggleModal();
 });
 
-//implemented Play Again button
-let reloadPage = document.getElementById('playAgain');
-reloadPage.addEventListener('click', function() {
-    window.location.reload();
-})
+// CLOSE MODAL
+chiudi.addEventListener('click', toggleModal);
+window.onclick = function(event) {
+    if (event.target === messaggio) {
+        messaggio.style.display = "none";
+    }
+}
+
+function toggleModal() {
+    messaggio.classList.toggle('show-modal');
+}
+
+/*
+ * DONE - set up the event listener for a card. If a card is clicked:
+ *  DONE - display the card's symbol (put this functionality in another function that you call from this one)
+ *  DONE - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
+ *  DONE - if the list already has another card, check to see if the two cards match
+ *   DONE  + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
+ *   DONE + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
+ *   DONE + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
+
+ *  DONE + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
+ */
